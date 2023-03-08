@@ -1,0 +1,102 @@
+#code by Kenneth Siu with help from Maddie Pero and Brianna Bouchard
+import sys
+import rclpy
+from rclpy.node import Node
+
+import requests # you may need to run 'pip install requests' to install this library
+import json 
+from std_msgs.msg import String
+from geometry_msgs.msg import Twist
+
+
+
+
+'''
+These statements allow the Node class to be used.
+'''
+def airtablefunc():
+    URL = 'MY AIRTABLE URL'
+
+    #'https://api.airtable.com/v0/' + BaseID + '/' + tableName + '?api_key=' + APIKey
+
+
+
+    r = requests.get(url = URL, params = {})
+    '''
+    The get request data comes in as a json package. We will convert this json package to a python dictionary so that it can be parsed
+    '''
+    data = r.json()
+
+
+    #input = data['records'][0]['fields']['input_value']
+
+
+    #print(input)
+
+
+    Angularvalue = data['records'][0]['fields']['Movement']
+    Linearvalue = data['records'][1]['fields']['Movement']
+    print(Angularvalue)
+    print(Linearvalue)
+    return Linearvalue,Angularvalue
+    #return Angularvalue
+
+
+
+class TwistNode(Node):
+    '''
+    
+    '''
+    def __init__(self):    
+    
+        super().__init__('twist_node')
+
+        print('Creating publisher')
+        self.twist_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
+
+        print('Creating a callback timer') 
+        timer_period = 1.0
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.i = 0
+    
+
+    def timer_callback(self):
+    
+        [Linearvector,Angularvector] =airtablefunc()
+        twist = Twist()
+        twist.linear.x = float(Linearvector)
+        twist.angular.z = float(Angularvector)
+        self.twist_publisher.publish(twist)
+        #self.get_logger().info(f'Twist published: {twist}')
+
+    
+
+
+
+def main(args=None):
+    '''
+    The rclpy library is initialized.
+    '''
+    rclpy.init(args=args)
+    
+    '''
+    The node is created and can be used in other parts of the script.
+    '''
+    twist_node = TwistNode()
+
+    '''
+    The node is "spun" so the callbacks can be called.
+    '''
+    print('Callbacks are called')
+    try:
+        rclpy.spin(twist_node)
+    except KeyboardInterrupt:
+        print('\nCaught Keyboard Interrupt')
+    finally:
+        print("Done")  # Destroy the node explicitly
+        twist_node.destroy_node()
+        rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()
