@@ -13,6 +13,6 @@ picam2.start() #must start the camera before taking any images
 time.sleep(1)
 
 for i in range(50):
-    picam2.capture_file('image{0:05d}.jpg'.format(i))
+    picam2.capture_file('image{0:09d}.jpg'.format(i))
     time.sleep(3)
 
