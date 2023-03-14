@@ -12,7 +12,7 @@ picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous}) #sets auto focus
 picam2.start() #must start the camera before taking any images
 time.sleep(1)
 
-for i in range(50):
-    picam2.capture_file('image{0:09d}.jpg'.format(i))
+for i in range(100):
+    picam2.capture_file('image{0:1d}.jpg'.format(i))
     time.sleep(3)
 
